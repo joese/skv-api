@@ -1,0 +1,237 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "SKV Hackaton 2016 API",
+        "description": "A way to get public information from Skatteverket as JSON",
+        "version": "0.0.1"
+    },
+    "host": "skv-hackaton-2016-joesew.c9users.io",
+    "schemes": [
+        "http"
+    ],
+    "basePath": "/",
+    "tags": [
+        {
+            "name": "Taxtable",
+            "description": "Retrieve taxtable data",
+            "externalDocs": {
+                "description": "Find out more",
+                "url": "http://www.skatteverket.se/privat/skatter/arbeteochinkomst/skattetabeller.4.18e1b10334ebe8bc80005221.html?q=skattetabeller"
+            }
+        },
+        {
+            "name": "Taxrate",
+            "description": "Retrieve taxrate data",
+            "externalDocs": {
+                "description": "Find out more",
+                "url": "http://www.skatteverket.se/omoss/omskatteverket/utvecklingavdigitalatjanster/psidata/beskattning/kommunalaskattesatser2016.4.3810a01c150939e893fb4e4.html"
+            }
+        }
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/taxtable": {
+            "get": {
+                "summary": "Serves taxtables from the Swedish Tax Agency",
+                "description": "The Taxtable endpoint returns information about full taxtables, parts of it or calculated tax based on query parameters. The response includes table number, min-/max-value and various columns refering to taxation rules based on year of birth. With no parameters, the complete set of taxtable entries will be returned. Parameters are filtering result.",
+                "parameters": [
+                    {
+                        "name": "table",
+                        "in": "query",
+                        "description": "The number that corresponds to the taxation rate.",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "salary",
+                        "in": "query",
+                        "description": "The amount of salary",
+                        "required": false,
+                        "type": "integer"
+                    },
+                    {
+                        "name": "column",
+                        "in": "query",
+                        "description": "The column to get data from",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "tags": [
+                    "Taxtable"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of taxtable intervals",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/taxtable"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/taxrate": {
+            "get": {
+                "summary": "Serves tax rates from the Swedish Tax Agency",
+                "description": "The taxrate endpoint returns information about tax rate in different municipals and townships within them.\n\nWith no parameters, the complete set of tax rates will be returned\n\nParameters are filtering result.\n",
+                "parameters": [
+                    {
+                        "name": "municipal",
+                        "in": "query",
+                        "description": "Searchquery for municipal",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Taxrate"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "An array of taxrate data",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/municipalTax"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "taxtable": {
+            "type": "object",
+            "properties": {
+                "table": {
+                    "type": "integer",
+                    "description": "The number that corresponds to tax rate."
+                },
+                "min": {
+                    "type": "integer",
+                    "description": "Min inclusive salary"
+                },
+                "max": {
+                    "type": "integer",
+                    "description": "Max inclusive salary"
+                },
+                "column1": {
+                    "type": "integer",
+                    "description": "Value is valid for people born 1951 or later. Including pension fee. Income eligible for worktax reduction."
+                },
+                "column2": {
+                    "type": "integer",
+                    "description": "Value is valid for people born 1950 or earlier. Not including pension fee. Income is not eligible for worktax reduction."
+                },
+                "column3": {
+                    "type": "integer",
+                    "description": "Value is valid for people born between 1938 and 1950. Including pension fee. Income eligible for an higher worktax reduction than column 1."
+                },
+                "column4": {
+                    "type": "integer",
+                    "description": "Value is valid for people born 1937 or earlier. Not including pension fee. Income eligible for the same level of worktax reduction as column 3."
+                },
+                "column5": {
+                    "type": "integer",
+                    "description": "Value is valid for people born 1938 or later with other incomes than regular salary for labour work. Including pension fee. Income is not eligible for worktax reduction."
+                },
+                "column6": {
+                    "type": "integer",
+                    "description": "Value is valid for people born 1951 or later. Not including pension fee. Income is not eligible for worktax reduction."
+                }
+            }
+        },
+        "municipalTax": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "description": "Unique identifier"
+                },
+                "municipal": {
+                    "type": "string",
+                    "description": "Name of the municipal"
+                },
+                "township": {
+                    "type": "string",
+                    "description": "Name of the township"
+                },
+                "sumInclChuchFee": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "Tax rate including church fee"
+                },
+                "sumExklChuchFee": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "Tax rate excluding church fee"
+                },
+                "municipalTaxRate": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "Municipal tax rate"
+                },
+                "countyTaxRate": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "Country tax rate"
+                },
+                "funeralFee": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "Funeral fee rate"
+                },
+                "churchFee": {
+                    "type": "number",
+                    "format": "double",
+                    "description": "Church fee rate"
+                }
+            }
+        },
+        "Error": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "fields": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
